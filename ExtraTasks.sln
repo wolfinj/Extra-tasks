@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "If-Risk", "If-Risk\If-Risk.csproj", "{9439A47E-8E29-45C1-AA88-25830E343D4D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "If-Risk.UnitTests", "If-Risk.UnitTests\If-Risk.UnitTests.csproj", "{5032EBC8-FB8F-4C00-91D2-6A1C249806CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{9439A47E-8E29-45C1-AA88-25830E343D4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9439A47E-8E29-45C1-AA88-25830E343D4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9439A47E-8E29-45C1-AA88-25830E343D4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5032EBC8-FB8F-4C00-91D2-6A1C249806CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5032EBC8-FB8F-4C00-91D2-6A1C249806CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5032EBC8-FB8F-4C00-91D2-6A1C249806CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5032EBC8-FB8F-4C00-91D2-6A1C249806CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
