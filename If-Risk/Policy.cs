@@ -59,6 +59,12 @@ public class Policy : IPolicy
         _insuredRisks.Add(risk);
         CalculatePremium();
     }
+    
+    public void AddRiskAfterSelling(Risk risk, DateTime validFrom)
+    {
+        _insuredRisks.Add(risk);
+        _premium += risk.YearlyPrice / 12 * (_validTill.Month - validFrom.Month);
+    }
 
 
     public bool RemoveRisk(string name)

@@ -15,7 +15,7 @@ public class InsuranceCompany :IInsuranceCompany
     /// <summary>
     /// List of sold policies
     /// </summary>
-    public readonly List<IPolicy> Policies;
+    public readonly List<Policy> Policies;
 
     public string Name => _name;
 
@@ -29,7 +29,7 @@ public class InsuranceCompany :IInsuranceCompany
     {
         _name = name;
         _availableRisks = availableRisks;
-        Policies = new List<IPolicy>();
+        Policies = new List<Policy>();
     }
 
     /// <summary>
@@ -48,7 +48,7 @@ public class InsuranceCompany :IInsuranceCompany
         }
 
         if (Policies.Exists(x => x.NameOfInsuredObject == nameOfInsuredObject) &&
-            IsDatesOverlaping(
+            IsDatesOverlapping(
                 validFrom,
                 validFrom.AddMonths(validMonths),
                 Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject)!.ValidFrom,
@@ -79,8 +79,18 @@ public class InsuranceCompany :IInsuranceCompany
     public void AddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom)
     {
         
-        //todo
-        AvailableRisks.Add(new Risk());
+        var selectedInsuranceObject = Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject);
+        if (selectedInsuranceObject == null)
+        {
+            throw new ArgumentException($"Insurance \"{nameOfInsuredObject}\" do not exist!");
+        }
+
+        if (validFrom > selectedInsuranceObject.ValidTill)
+        {
+            throw new ArgumentException($"Policy expired at {selectedInsuranceObject.ValidTill}");
+        }
+        
+        selectedInsuranceObject.AddRiskAfterSelling(risk,validFrom);
     }
 
     /// <summary>
@@ -95,7 +105,7 @@ public class InsuranceCompany :IInsuranceCompany
         throw new NotImplementedException();
     }
 
-    private bool IsDatesOverlaping(DateTime a1, DateTime a2, DateTime b1, DateTime b2)
+    private bool IsDatesOverlapping(DateTime a1, DateTime a2, DateTime b1, DateTime b2)
     {
         if (a1 < b2 && a2 > b1) return true;
 

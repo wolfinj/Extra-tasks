@@ -8,10 +8,20 @@ public class InsuranceCompanyTest
     private readonly List<Risk> _risksForPolicy;
 
     private readonly DateTime _startDate;
+    private DateTime _startDateInProgress;
+    private DateTime _startDateAfterExpiring;
+    
+    private Risk validTestRisk;
+    private Risk invalidTestRisk;
 
     public InsuranceCompanyTest()
     {
         _startDate = new(2024, 02, 01);
+        _startDateInProgress = new(2024, 04, 01);
+        _startDateAfterExpiring = new(2026, 04, 01);
+
+        validTestRisk = new Risk("Theft", 200);
+        invalidTestRisk = new Risk("Giants", 200);
 
         var risks = new List<Risk>
         {
@@ -104,5 +114,41 @@ public class InsuranceCompanyTest
             ));
 
         Assert.Equal("One or more risks are not available!", exception.Message);
+    }
+
+
+    [Fact]
+    public void InsuranceCompany_AddRiskToNonExistingPolicy_GetException()
+    {
+        _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
+
+        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            _megaSafe.AddRisk("Ship insurance", validTestRisk, _startDateInProgress)
+        );
+
+        Assert.Equal("Insurance \"Ship insurance\" do not exist!", exception.Message);
+    }
+
+    [Fact]
+    public void InsuranceCompany_AddRiskAfterPolicyExpired_GetException()
+    {
+        _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
+
+        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+            _megaSafe.AddRisk("Home insurance", validTestRisk, _startDateAfterExpiring)
+        );
+
+        Assert.Equal($"Policy expired at {_startDate.AddMonths(8)}", exception.Message);
+    }
+
+    [Fact]
+    public void InsuranceCompany_AddRiskToActivePolicy_GetRiskCountAndCorrectPremium()
+    {
+        _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
+
+        _megaSafe.AddRisk("Home insurance", validTestRisk, _startDateInProgress);
+
+        _megaSafe.Policies.First().InsuredRisks.Count.Should().Be(4);
+        _megaSafe.Policies.First().Premium.Should().Be(1100);
     }
 }
