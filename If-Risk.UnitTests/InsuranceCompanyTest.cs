@@ -6,6 +6,7 @@ public class InsuranceCompanyTest
 {
     private readonly InsuranceCompany _megaSafe;
     private readonly List<Risk> _risksForPolicy;
+    private readonly List<Risk> _availableRisks;
 
     private readonly DateTime _startDate;
     private readonly DateTime _startDateInProgress;
@@ -23,7 +24,7 @@ public class InsuranceCompanyTest
         _validTestRisk = new Risk("Theft", 200);
         _invalidTestRisk = new Risk("Giants", 200);
 
-        var risks = new List<Risk>
+        _availableRisks = new List<Risk>
         {
             new("Theft", 200),
             new("Flood", 300),
@@ -40,7 +41,7 @@ public class InsuranceCompanyTest
         };
 
 
-        _megaSafe = new InsuranceCompany("Mega Safe Insurance", risks);
+        _megaSafe = new InsuranceCompany("Mega Safe Insurance", _availableRisks);
     }
 
     [Fact]
@@ -50,20 +51,20 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_CreateNewCompany_CheckAvailableRisks()
+    public void InsuranceCompany_CreateNewCompany_CompanyHas5Risks()
     {
-        _megaSafe.AvailableRisks.Count.Should().Be(5);
+        _megaSafe.AvailableRisks.Count.Should().Be(_availableRisks.Count);
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicy_CheckPolicyCount()
+    public void InsuranceCompany_SellPolicy_PolicyAddedToPoliciesList()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
         _megaSafe.Policies.Count.Should().Be(1);
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyInPast_GetException()
+    public void InsuranceCompany_SellPolicyInPast_ThrowsArgumentException()
     {
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
             _megaSafe.SellPolicy(
@@ -77,7 +78,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyWithOverlappingDates_GetException()
+    public void InsuranceCompany_SellPolicyWithOverlappingDates_ThrowsArgumentException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -94,7 +95,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyWithUnavailableRisks_GetException()
+    public void InsuranceCompany_SellPolicyWithUnavailableRisks_ThrowsArgumentException()
     {
         var risksForPolicyWrong = new List<Risk>
         {
@@ -119,7 +120,7 @@ public class InsuranceCompanyTest
 
 
     [Fact]
-    public void InsuranceCompany_AddRiskToNonExistingPolicy_GetException()
+    public void InsuranceCompany_AddRiskToNonExistingPolicy_ThrowsArgumentException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -131,7 +132,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_AddUnavailableRisk_GetException()
+    public void InsuranceCompany_AddUnavailableRisk_ThrowsArgumentException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -143,7 +144,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_AddRiskAfterPolicyExpired_GetException()
+    public void InsuranceCompany_AddRiskAfterPolicyExpired_ThrowsArgumentException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -155,7 +156,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_AddRiskToActivePolicy_GetRiskCountAndCorrectPremium()
+    public void InsuranceCompany_AddRiskToActivePolicy_RiskCountIncreasedPremiumRecalculated()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -167,7 +168,7 @@ public class InsuranceCompanyTest
     
     
     [Fact]
-    public void InsuranceCompany_ReturnWrongInsuranceName_GetException()
+    public void InsuranceCompany_ReturnWrongInsuranceName_ThrowsArgumentException()
     {
 
         ArgumentException exception = Assert.Throws<ArgumentException>(() =>
@@ -180,7 +181,7 @@ public class InsuranceCompanyTest
     
     
     [Fact]
-    public void InsuranceCompany_InputWrongDate_GetException()
+    public void InsuranceCompany_InputWrongDate_ThrowsArgumentException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
         
