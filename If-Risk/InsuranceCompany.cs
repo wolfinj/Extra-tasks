@@ -1,3 +1,5 @@
+using If_Risk.Exceptions;
+
 namespace If_Risk;
 
 public class InsuranceCompany : IInsuranceCompany
@@ -52,7 +54,7 @@ public class InsuranceCompany : IInsuranceCompany
 
     private void ValidateInputs(string nameOfInsuredObject, DateTime validFrom, short validMonths, IList<Risk> selectedRisks)
     {
-        if (validFrom < DateTime.Now) throw new ArgumentException("Policy starting date can not be in past!");
+        if (validFrom < DateTime.Now) throw new InvalidPolicyStartingTimeException();
 
         if (Policies.Exists(x => x.NameOfInsuredObject == nameOfInsuredObject) &&
             IsDatesOverlapping(
@@ -61,10 +63,10 @@ public class InsuranceCompany : IInsuranceCompany
                 FindInsuredObjectByName(nameOfInsuredObject)!.ValidFrom,
                 FindInsuredObjectByName(nameOfInsuredObject)!.ValidTill
             ))
-            throw new ArgumentException("Policy with the same name cant overlap period!");
+            throw new PolicyPeriodOverlapException();
 
         if (selectedRisks.Intersect(_availableRisks).Count() != selectedRisks.Count)
-            throw new ArgumentException("One or more risks are not available!");
+            throw new RiskNotAvailableException();
     }
 
     /// <summary>
@@ -83,12 +85,20 @@ public class InsuranceCompany : IInsuranceCompany
 
     private void ValidateAddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom, Policy? selectedInsuranceObject)
     {
-        if (!_availableRisks.Contains(risk)) throw new ArgumentException($"{risk.Name} is not available!");
+        if (!_availableRisks.Contains(risk))
+        {
+            throw new RiskDoesNotExistsException($"{risk.Name} is not available!");
+        }
+        
         if (selectedInsuranceObject == null)
-            throw new ArgumentException($"Insurance \"{nameOfInsuredObject}\" do not exist!");
+        {
+            throw new PolicyNotFoundException($"Insurance \"{nameOfInsuredObject}\" do not exist!");
+        }
 
         if (validFrom > selectedInsuranceObject.ValidTill)
-            throw new ArgumentException($"Policy expired at {selectedInsuranceObject.ValidTill}");
+        {
+            throw new PolicyExpiredException($"Policy expired at {selectedInsuranceObject.ValidTill}");
+        }
     }
 
     private Policy? FindInsuredObjectByName(string nameOfInsuredObject)
@@ -105,11 +115,11 @@ public class InsuranceCompany : IInsuranceCompany
     public IPolicy GetPolicy(string nameOfInsuredObject, DateTime effectiveDate)
     {
         if (!Policies.Exists(x => x.NameOfInsuredObject == nameOfInsuredObject))
-            throw new ArgumentException($"There is no policy with name \"{nameOfInsuredObject}\"!");
+            throw new InsuredObjectDoesNotExistsException($"There is no policy with name \"{nameOfInsuredObject}\"!");
 
         return Policies.Find(x =>
             x.NameOfInsuredObject == nameOfInsuredObject && x.ValidFrom <= effectiveDate &&
-            x.ValidTill >= effectiveDate) ?? throw new ArgumentException("There is no valid Policy at this time!");
+            x.ValidTill >= effectiveDate) ?? throw new InvalidPolicyException();
     }
 
     private bool IsDatesOverlapping(DateTime aTimeStart, DateTime aTimeEnd, DateTime bTimeStart, DateTime bTimeEnd)

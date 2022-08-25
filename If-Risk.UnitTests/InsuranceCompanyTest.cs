@@ -1,4 +1,5 @@
 using FluentAssertions;
+using If_Risk.Exceptions;
 
 namespace If_Risk.UnitTests;
 
@@ -66,7 +67,7 @@ public class InsuranceCompanyTest
     [Fact]
     public void InsuranceCompany_SellPolicyInPast_ThrowsArgumentException()
     {
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        InvalidPolicyStartingTimeException exception = Assert.Throws<InvalidPolicyStartingTimeException>(() =>
             _megaSafe.SellPolicy(
                 "Home insurance",
                 DateTime.Now.Subtract(TimeSpan.FromDays(5)),
@@ -83,7 +84,7 @@ public class InsuranceCompanyTest
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
 
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        PolicyPeriodOverlapException exception = Assert.Throws<PolicyPeriodOverlapException>(() =>
             _megaSafe.SellPolicy(
                 "Home insurance",
                 _startDate,
@@ -91,7 +92,7 @@ public class InsuranceCompanyTest
                 _risksForPolicy
             ));
 
-        Assert.Equal("Policy with the same name cant overlap period!", exception.Message);
+        Assert.Equal("Policy with the same name can't overlap period!", exception.Message);
     }
 
     [Fact]
@@ -107,7 +108,7 @@ public class InsuranceCompanyTest
 
         // _megaSafe.SellPolicy("Home insurance", _startDate, 8, risksForPolicyWrong).Should().Throw<ArgumentException>().WithMessage("Hello is not allowed at this moment");
         
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        RiskNotAvailableException exception = Assert.Throws<RiskNotAvailableException>(() =>
             _megaSafe.SellPolicy(
                 "Home insurance",
                 _startDate,
@@ -124,7 +125,7 @@ public class InsuranceCompanyTest
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        PolicyNotFoundException exception = Assert.Throws<PolicyNotFoundException>(() =>
             _megaSafe.AddRisk("Ship insurance", _validTestRisk, _startDateInProgress)
         );
 
@@ -148,7 +149,7 @@ public class InsuranceCompanyTest
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        PolicyExpiredException exception = Assert.Throws<PolicyExpiredException>(() =>
             _megaSafe.AddRisk("Home insurance", _validTestRisk, _startDateAfterExpiring)
         );
 
@@ -171,7 +172,7 @@ public class InsuranceCompanyTest
     public void InsuranceCompany_ReturnWrongInsuranceName_ThrowsArgumentException()
     {
 
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        InsuredObjectDoesNotExistsException exception = Assert.Throws<InsuredObjectDoesNotExistsException>(() =>
             _megaSafe.GetPolicy("Home insurance", _startDateInProgress)
         );
 
@@ -185,7 +186,7 @@ public class InsuranceCompanyTest
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
         
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        InvalidPolicyException exception = Assert.Throws<InvalidPolicyException>(() =>
             _megaSafe.GetPolicy("Home insurance", _startDateAfterExpiring)
         );
 
