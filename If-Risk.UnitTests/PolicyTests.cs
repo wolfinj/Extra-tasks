@@ -37,37 +37,46 @@ public class PolicyTests
     [Fact]
     public void Policy_CreateNewPolicy_ReturnValidPremium()
     {
+        decimal expectedPremium = 900;
+
         _homePolicy.Premium.Should().Be(_risks.Aggregate(0M, (a, x) => a += x.YearlyPrice) / 2);
-        _homePolicy.Premium.Should().Be(900);
+        _homePolicy.Premium.Should().Be(expectedPremium);
     }
 
     [Fact]
     public void Policy_AddNewRisk_ReturnCorrectPremium()
     {
         var zombieRisk = new Risk("Zombie", 200);
-        _homePolicy.AddRisk(zombieRisk);
+        _homePolicy.AddRisk(zombieRisk, _startDate);
 
-        _homePolicy.Premium.Should().Be(_risks.Aggregate(0M, (a, x) => a += x.YearlyPrice) / 2);
-        _homePolicy.Premium.Should().Be(1000);
+        decimal expectedPremium = 1000;
+
+        _homePolicy.Premium.Should()
+            .Be((_risks.Aggregate((decimal)0, (a, x) => a += x.YearlyPrice) + zombieRisk.YearlyPrice) / 2);
+
+        _homePolicy.Premium.Should().Be(expectedPremium);
     }
 
     [Fact]
     public void Policy_RemoveRisk_RiskIsRemovedAndPremiumIsRecalculated()
     {
         var isRiskRemoved = _homePolicy.RemoveRisk("Aliens");
+        var expectedPremium = 300;
+        var expectedRiskCount = 3;
+
 
         isRiskRemoved.Should().BeTrue();
-        _homePolicy.InsuredRisks.Count.Should().Be(3);
-        _homePolicy.Premium.Should().Be(300);
+        _homePolicy.InsuredRisks.Count.Should().Be(expectedRiskCount);
+        _homePolicy.Premium.Should().Be(expectedPremium);
     }
 
     [Fact]
     public void Policy_RemoveRisk_RiskIsNotRemoved()
     {
         var isRiskRemoved = _homePolicy.RemoveRisk("Sharks");
+        var expectedRiskCount = 4;
 
         isRiskRemoved.Should().BeFalse();
-        _homePolicy.InsuredRisks.Count.Should().Be(4);
-        _homePolicy.Premium.Should().Be(900);
+        _homePolicy.InsuredRisks.Count.Should().Be(expectedRiskCount);
     }
 }

@@ -65,7 +65,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyInPast_ThrowsArgumentException()
+    public void InsuranceCompany_SellPolicyInPast_ThrowsInvalidPolicyStartingTimeException()
     {
         InvalidPolicyStartingTimeException exception = Assert.Throws<InvalidPolicyStartingTimeException>(() =>
             _megaSafe.SellPolicy(
@@ -79,7 +79,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyWithOverlappingDates_ThrowsArgumentException()
+    public void InsuranceCompany_SellPolicyWithOverlappingDates_ThrowsPolicyPeriodOverlapException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -96,7 +96,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_SellPolicyWithUnavailableRisks_ThrowsArgumentException()
+    public void InsuranceCompany_SellPolicyWithUnavailableRisks_ThrowsRiskNotAvailableException()
     {
         var risksForPolicyWrong = new List<Risk>
         {
@@ -106,8 +106,17 @@ public class InsuranceCompanyTest
             new("Zombie", 200)
         };
 
-        // _megaSafe.SellPolicy("Home insurance", _startDate, 8, risksForPolicyWrong).Should().Throw<ArgumentException>().WithMessage("Hello is not allowed at this moment");
-        
+        // Note vari paskatīties kāpēc Throw nav pieejams?
+
+        // _megaSafe.SellPolicy(
+        //     "Home insurance",
+        //     _startDate, 
+        //     8, 
+        //     risksForPolicyWrong)
+        //     .Should()
+        //     .Throw<ArgumentException>()
+        //     .WithMessage("One or more risks are not available!");
+
         RiskNotAvailableException exception = Assert.Throws<RiskNotAvailableException>(() =>
             _megaSafe.SellPolicy(
                 "Home insurance",
@@ -121,7 +130,7 @@ public class InsuranceCompanyTest
 
 
     [Fact]
-    public void InsuranceCompany_AddRiskToNonExistingPolicy_ThrowsArgumentException()
+    public void InsuranceCompany_AddRiskToNonExistingPolicy_ThrowsPolicyNotFoundException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -133,11 +142,11 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_AddUnavailableRisk_ThrowsArgumentException()
+    public void InsuranceCompany_AddUnavailableRisk_ThrowsRiskDoesNotExistsException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
-        ArgumentException exception = Assert.Throws<ArgumentException>(() =>
+        RiskDoesNotExistsException exception = Assert.Throws<RiskDoesNotExistsException>(() =>
             _megaSafe.AddRisk("Ship insurance", _invalidTestRisk, _startDateInProgress)
         );
 
@@ -145,7 +154,7 @@ public class InsuranceCompanyTest
     }
 
     [Fact]
-    public void InsuranceCompany_AddRiskAfterPolicyExpired_ThrowsArgumentException()
+    public void InsuranceCompany_AddRiskAfterPolicyExpired_ThrowsPolicyExpiredException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -166,36 +175,34 @@ public class InsuranceCompanyTest
         _megaSafe.Policies.First().InsuredRisks.Count.Should().Be(4);
         _megaSafe.Policies.First().Premium.Should().Be(1100);
     }
-    
-    
-    [Fact]
-    public void InsuranceCompany_ReturnWrongInsuranceName_ThrowsArgumentException()
-    {
 
+
+    [Fact]
+    public void InsuranceCompany_ReturnWrongInsuranceName_ThrowsInsuredObjectDoesNotExistsException()
+    {
         InsuredObjectDoesNotExistsException exception = Assert.Throws<InsuredObjectDoesNotExistsException>(() =>
             _megaSafe.GetPolicy("Home insurance", _startDateInProgress)
         );
 
         Assert.Equal("There is no policy with name \"Home insurance\"!", exception.Message);
-
     }
-    
-    
+
+
     [Fact]
-    public void InsuranceCompany_InputWrongDate_ThrowsArgumentException()
+    public void InsuranceCompany_InputWrongDate_ThrowsInvalidPolicyException()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
-        
+
         InvalidPolicyException exception = Assert.Throws<InvalidPolicyException>(() =>
             _megaSafe.GetPolicy("Home insurance", _startDateAfterExpiring)
         );
 
         Assert.Equal("There is no valid Policy at this time!", exception.Message);
     }
-    
-    
+
+
     [Fact]
-    public void InsuranceCompany_GetPolicy_GetCorrectPolicy()
+    public void InsuranceCompany_GetPolicy_ReturnsCorrectPolicy()
     {
         _megaSafe.SellPolicy("Home insurance", _startDate, 8, _risksForPolicy);
 
@@ -203,6 +210,4 @@ public class InsuranceCompanyTest
 
         _megaSafe.GetPolicy("Home insurance", _startDateInProgress).Should().BeEquivalentTo(policy);
     }
-    
-    
 }

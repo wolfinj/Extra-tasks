@@ -21,6 +21,13 @@ public class InsuranceCompany : IInsuranceCompany
         Policies = new List<Policy>();
     }
 
+    public InsuranceCompany(string name, List<Risk> availableRisks, List<Policy> startingPolicies)
+    {
+        Name = name;
+        _availableRisks = availableRisks;
+        Policies = startingPolicies;
+    }
+
     /// <summary>
     ///     Name of Insurance company
     /// </summary>
@@ -52,7 +59,8 @@ public class InsuranceCompany : IInsuranceCompany
         return newPolicy;
     }
 
-    private void ValidateInputs(string nameOfInsuredObject, DateTime validFrom, short validMonths, IList<Risk> selectedRisks)
+    private void ValidateInputs(string nameOfInsuredObject, DateTime validFrom, short validMonths,
+        IList<Risk> selectedRisks)
     {
         if (validFrom < DateTime.Now) throw new InvalidPolicyStartingTimeException();
 
@@ -78,18 +86,20 @@ public class InsuranceCompany : IInsuranceCompany
     public void AddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom)
     {
         var selectedInsuranceObject = FindInsuredObjectByName(nameOfInsuredObject);
+
         ValidateAddRisk(nameOfInsuredObject, risk, validFrom, selectedInsuranceObject);
 
-        selectedInsuranceObject.AddRiskAfterSelling(risk, validFrom);
+        selectedInsuranceObject.AddRisk(risk, validFrom);
     }
 
-    private void ValidateAddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom, Policy? selectedInsuranceObject)
+    private void ValidateAddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom,
+        Policy? selectedInsuranceObject)
     {
         if (!_availableRisks.Contains(risk))
         {
             throw new RiskDoesNotExistsException($"{risk.Name} is not available!");
         }
-        
+
         if (selectedInsuranceObject == null)
         {
             throw new PolicyNotFoundException($"Insurance \"{nameOfInsuredObject}\" do not exist!");
