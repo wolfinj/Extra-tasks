@@ -189,7 +189,7 @@ public class InsuranceCompanyTest
             _megaSafe.GetPolicy("Home insurance", _startDateAfterExpiring)
         );
 
-        Assert.Equal("There is no walid Policy at this time!", exception.Message);
+        Assert.Equal("There is no valid Policy at this time!", exception.Message);
     }
     
     

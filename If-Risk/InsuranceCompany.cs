@@ -39,7 +39,18 @@ public class InsuranceCompany : IInsuranceCompany
     /// <param name="selectedRisks">List of risks that must be included in the policy</param>
     /// <returns>Information about policy</returns>
     public IPolicy SellPolicy(string nameOfInsuredObject, DateTime validFrom, short validMonths,
-        IList<Risk> selectedRisks)
+        List<Risk> selectedRisks)
+    {
+        ValidateInputs(nameOfInsuredObject, validFrom, validMonths, selectedRisks);
+
+        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), selectedRisks);
+
+        Policies.Add(newPolicy);
+
+        return newPolicy;
+    }
+
+    private void ValidateInputs(string nameOfInsuredObject, DateTime validFrom, short validMonths, IList<Risk> selectedRisks)
     {
         if (validFrom < DateTime.Now) throw new ArgumentException("Policy starting date can not be in past!");
 
@@ -47,19 +58,13 @@ public class InsuranceCompany : IInsuranceCompany
             IsDatesOverlapping(
                 validFrom,
                 validFrom.AddMonths(validMonths),
-                Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject)!.ValidFrom,
-                Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject)!.ValidTill
+                FindInsuredObjectByName(nameOfInsuredObject)!.ValidFrom,
+                FindInsuredObjectByName(nameOfInsuredObject)!.ValidTill
             ))
             throw new ArgumentException("Policy with the same name cant overlap period!");
 
         if (selectedRisks.Intersect(_availableRisks).Count() != selectedRisks.Count)
             throw new ArgumentException("One or more risks are not available!");
-
-        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), selectedRisks);
-
-        Policies.Add(newPolicy);
-
-        return newPolicy;
     }
 
     /// <summary>
@@ -70,15 +75,25 @@ public class InsuranceCompany : IInsuranceCompany
     /// <param name="validFrom">Date when risk becomes active. Can not be in the past</param>
     public void AddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom)
     {
+        var selectedInsuranceObject = FindInsuredObjectByName(nameOfInsuredObject);
+        ValidateAddRisk(nameOfInsuredObject, risk, validFrom, selectedInsuranceObject);
+
+        selectedInsuranceObject.AddRiskAfterSelling(risk, validFrom);
+    }
+
+    private void ValidateAddRisk(string nameOfInsuredObject, Risk risk, DateTime validFrom, Policy? selectedInsuranceObject)
+    {
         if (!_availableRisks.Contains(risk)) throw new ArgumentException($"{risk.Name} is not available!");
-        var selectedInsuranceObject = Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject);
         if (selectedInsuranceObject == null)
             throw new ArgumentException($"Insurance \"{nameOfInsuredObject}\" do not exist!");
 
         if (validFrom > selectedInsuranceObject.ValidTill)
             throw new ArgumentException($"Policy expired at {selectedInsuranceObject.ValidTill}");
+    }
 
-        selectedInsuranceObject.AddRiskAfterSelling(risk, validFrom);
+    private Policy? FindInsuredObjectByName(string nameOfInsuredObject)
+    {
+        return Policies.Find(x => x.NameOfInsuredObject == nameOfInsuredObject);
     }
 
     /// <summary>
@@ -94,7 +109,7 @@ public class InsuranceCompany : IInsuranceCompany
 
         return Policies.Find(x =>
             x.NameOfInsuredObject == nameOfInsuredObject && x.ValidFrom <= effectiveDate &&
-            x.ValidTill >= effectiveDate) ?? throw new ArgumentException("There is no walid Policy at this time!");
+            x.ValidTill >= effectiveDate) ?? throw new ArgumentException("There is no valid Policy at this time!");
     }
 
     private bool IsDatesOverlapping(DateTime aTimeStart, DateTime aTimeEnd, DateTime bTimeStart, DateTime bTimeEnd)

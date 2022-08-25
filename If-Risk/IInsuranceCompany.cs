@@ -10,6 +10,7 @@ public interface IInsuranceCompany
     /// List of the risks that can be insured. List can be updated at any time
     /// </summary>
     IList<Risk> AvailableRisks { get; set; }
+
     /// <summary>
     /// Sell the policy.
     /// </summary>
@@ -18,7 +19,7 @@ public interface IInsuranceCompany
     /// <param name="validMonths">Policy period in months</param>
     /// <param name="selectedRisks">List of risks that must be included in the policy</param>
     /// <returns>Information about policy</returns>
-    IPolicy SellPolicy(string nameOfInsuredObject, DateTime validFrom, short validMonths, IList<Risk> selectedRisks);
+    IPolicy SellPolicy(string nameOfInsuredObject, DateTime validFrom, short validMonths, List<Risk> selectedRisks);
     /// <summary>
     /// Add risk to the policy of insured object.
     /// </summary>

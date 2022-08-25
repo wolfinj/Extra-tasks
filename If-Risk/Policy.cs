@@ -11,19 +11,27 @@ public class Policy : IPolicy
     ///     Date when policy becomes inactive
     /// </summary>
     private readonly DateTime _validTill;
-
+    
+    /// <summary>
+    ///     Date when policy becomes active
+    /// </summary>
+    private readonly DateTime _validFrom;
+    
     /// <summary>
     ///     Total months policy is valid
     /// </summary>
     private readonly int _monthValid;
 
-    public Policy(string nameOfInsuredObject, DateTime validFrom, DateTime validTill, IList<Risk> insuredRisks)
+    private readonly string _nameOfInsuredObject;
+    private decimal _premium;
+
+    public Policy(string nameOfInsuredObject, DateTime validFrom, DateTime validTill, List<Risk> insuredRisks)
     {
         _monthValid = validTill.Month - validFrom.Month;
-        NameOfInsuredObject = nameOfInsuredObject;
-        ValidFrom = validFrom;
+        _nameOfInsuredObject = nameOfInsuredObject;
+        _validFrom = validFrom;
         _validTill = validTill;
-        _insuredRisks = (List<Risk>?)insuredRisks;
+        _insuredRisks = insuredRisks;
         CalculatePremium();
     }
 
@@ -31,12 +39,9 @@ public class Policy : IPolicy
     /// <summary>
     ///     Name of insured object
     /// </summary>
-    public string NameOfInsuredObject { get; }
+    public string NameOfInsuredObject => _nameOfInsuredObject;
 
-    /// <summary>
-    ///     Date when policy becomes active
-    /// </summary>
-    public DateTime ValidFrom { get; }
+    public DateTime ValidFrom => _validFrom;
 
     public DateTime ValidTill => _validTill;
 
@@ -44,7 +49,11 @@ public class Policy : IPolicy
     ///     Total price of the policy. Calculate by summing up all insured risks.
     ///     Take into account that risk price is given for 1 full year. Policy/risk period can be shorter.
     /// </summary>
-    public decimal Premium { get; private set; }
+    public decimal Premium
+    {
+        get => _premium;
+        private set => _premium = value;
+    }
 
     public IList<Risk> InsuredRisks => _insuredRisks;
 
