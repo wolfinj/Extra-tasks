@@ -52,7 +52,7 @@ public class InsuranceCompany : IInsuranceCompany
     {
         ValidateInputs(nameOfInsuredObject, validFrom, validMonths, selectedRisks);
 
-        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), (List<Risk>)selectedRisks);
+        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), selectedRisks);
 
         Policies.Add(newPolicy);
 

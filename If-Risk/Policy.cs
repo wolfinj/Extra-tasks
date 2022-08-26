@@ -26,7 +26,7 @@ public class Policy : IPolicy
 
     private readonly string _nameOfInsuredObject;
 
-    public Policy(string nameOfInsuredObject, DateTime validFrom, DateTime validTill, List<Risk> insuredRisks)
+    public Policy(string nameOfInsuredObject, DateTime validFrom, DateTime validTill, IList<Risk> insuredRisks)
     {
         _monthValid = validTill.Month - validFrom.Month;
         _nameOfInsuredObject = nameOfInsuredObject;
