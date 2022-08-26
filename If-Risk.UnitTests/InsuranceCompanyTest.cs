@@ -108,14 +108,9 @@ public class InsuranceCompanyTest
 
         // Note vari paskatīties kāpēc Throw nav pieejams?
 
-        // _megaSafe.SellPolicy(
-        //     "Home insurance",
-        //     _startDate, 
-        //     8, 
-        //     risksForPolicyWrong)
-        //     .Should()
-        //     .Throw<ArgumentException>()
-        //     .WithMessage("One or more risks are not available!");
+        var act = () => _megaSafe.SellPolicy("Home insurance", _startDate, 8, risksForPolicyWrong);
+
+        act.Should().Throw<RiskNotAvailableException>().WithMessage("One or more risks are not available!");
 
         RiskNotAvailableException exception = Assert.Throws<RiskNotAvailableException>(() =>
             _megaSafe.SellPolicy(
