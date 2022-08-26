@@ -48,11 +48,11 @@ public class InsuranceCompany : IInsuranceCompany
     /// <param name="selectedRisks">List of risks that must be included in the policy</param>
     /// <returns>Information about policy</returns>
     public IPolicy SellPolicy(string nameOfInsuredObject, DateTime validFrom, short validMonths,
-        List<Risk> selectedRisks)
+        IList<Risk> selectedRisks)
     {
         ValidateInputs(nameOfInsuredObject, validFrom, validMonths, selectedRisks);
 
-        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), selectedRisks);
+        var newPolicy = new Policy(nameOfInsuredObject, validFrom, validFrom.AddMonths(validMonths), (List<Risk>)selectedRisks);
 
         Policies.Add(newPolicy);
 
